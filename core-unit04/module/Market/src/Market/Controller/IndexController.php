@@ -1,0 +1,26 @@
+<?php
+namespace Market\Controller;
+
+use Zend\Mvc\Controller\AbstractActionController;
+use Zend\View\Model\ViewModel;
+use Market\Model\ListingsTable;
+use Market\Model\ListingsTableAwareInterface;
+
+class IndexController extends AbstractActionController implements ListingsTableAwareInterface
+{
+	
+    use \Market\Model\ListingsTableAwareTrait;
+ 
+    protected $listingsTable;
+
+    public function indexAction()
+    {
+        // latest listing by entry ID
+        $latest   = $this->listingsTable->getLatestListing();
+        // check for messages
+        $messages = ($this->flashMessenger()->hasMessages()) ? $this->flashMessenger()->getMessages() : NULL;
+        // done
+        return new ViewModel(array('latest'     => $latest,
+                                   'messages'     => $messages));
+    }
+}
