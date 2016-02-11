@@ -17,6 +17,7 @@ return array(
                     'defaults' => array(
                         'controller' => 'market-index-controller',
                         'action'     => 'index',
+                        'cache'      => 1,
                     ),
                 ),
             ),
@@ -37,6 +38,7 @@ return array(
                     'defaults' => array(
                         'controller'    => 'market-view-controller',
                         'action'        => 'index',
+                        'cache'      => 1,
                     ),
                 ),
                 'may_terminate' => true,
@@ -61,6 +63,7 @@ return array(
                     'defaults' => array(
                         'controller'    => 'market-view-controller',
                         'action'        => 'item',
+                        'cache'      => 1,
                     ),
                 ),
                 'may_terminate' => true,

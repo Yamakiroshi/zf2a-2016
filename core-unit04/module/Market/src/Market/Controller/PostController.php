@@ -1,14 +1,14 @@
 <?php
 namespace Market\Controller;
 
-use Zend\Mvc\Controller\AbstractActionController;
-use Zend\View\Model\ViewModel;
-use Zend\Validator\File;
-use Zend\File\Transfer\Adapter\Http as FileTransfer;
-use Zend\Mail;
-use Zend\Session;
-use Market\Model;
 use Market\Form;
+use Market\Model;
+use Zend\Session;
+use Zend\Validator\File;
+use Zend\View\Model\ViewModel;
+use Zend\Mvc\Controller\AbstractActionController;
+//use Zend\File\Transfer\Adapter\Http as FileTransfer;
+//use Zend\Mail;
 
 class PostController extends AbstractActionController implements Model\ListingsTableAwareInterface
 {
@@ -67,30 +67,52 @@ class PostController extends AbstractActionController implements Model\ListingsT
 
                 // save posting to database and deal with results
                 if ($this->listingsTable->add($validData)) {
+                    
                     // add flash message
                     $this->flashMessenger()->addMessage('Your Listing Has Been Posted!');
                     
+        			// clear cache
+        			$em = $this->getEventManager();
+        			$em->trigger($this->getServiceLocator()->get('cache-event-clear'), $this);
                     
+					// email notification
+        			$em->trigger($this->getServiceLocator()->get('notification-event-notify'), 
+        			             $this,
+        			             ['delCode' => $validData['delCode'],
+        			              'serviceManager' => $this->getServiceLocator()]
+		             );
+                     
+					// log the event
+        			$em->trigger($this->getServiceLocator()->get('logging-event-notify'), 
+        			             $this,
+        			             ['message' => 'A new item has been posted: ' . $validData['title'],
+        			              'serviceManager' => $this->getServiceLocator()]
+		             );
+                     
                     /**
                      * Task: Sending of an email upon succesful posting is not part of the core logic.
                      * Move it to a better place.
                      */
-                    $this->sendNotification ($validData['delCode']);
+                    // $this->sendNotification ($validData['delCode']);
                     
                     /**
                      * Task: The deletion of the cache is not part of the core logic.
                      * Move it to a better place on successful posting.
                      */
+                    /*
                     if($this->serviceLocator->has('cache')) {
                     	$cache = $this->serviceLocator->get('cache');
                     	$cache->cleanByTags(array('CAT_'.$validData['category']));
                     }
+                    */
                     
                     /**
                      * Task: The logging is not part of the core logic.
                      * Move it to a better place on successful posting.
                      */
-                    $this->serviceLocator->get('log')->warn('Added new post "'.$validData['title'].'"');
+                    //$this->serviceLocator->get('log')->warn('Added new post "'.$validData['title'].'"');
+                    
+                                  
                 } else {
                     // add flash message
                     $this->flashMessenger()->addMessage('Technical Fault: Unable to Post Your Listing!');
@@ -108,15 +130,17 @@ class PostController extends AbstractActionController implements Model\ListingsT
         }
 
         // proceed as planned
-        return new ViewModel(array(    'categories'    => $this->categories,
+        return new ViewModel(array( 'categories'    => $this->categories,
                                     'postForm'         => $this->postForm,
                                     'data'             => $data,
                                     'messages'         => $messages));
     }
+    
     /**
      * Sends email notification
      * @param string $delCode = delete code
      */
+     /*
      protected function sendNotification($delCode)
      {
         // send confirmation email with edit/delete code
@@ -129,7 +153,8 @@ class PostController extends AbstractActionController implements Model\ListingsT
                      ->setEncoding('utf-8');
         return $this->mailTransport->send($emailMessage);
     }
-
+    */
+    
     /**
      * @param array $validData
      */

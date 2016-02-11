@@ -4,6 +4,9 @@ return array(
         'Application',
     	'Market',
     	'Search',
+        'Cache',
+        'Notification',
+        'Logging',
     ),
     'module_listener_options' => array(
         'config_glob_paths'    => array('config/autoload/{,*.}{global,local}.php'),

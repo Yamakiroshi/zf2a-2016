@@ -1,14 +1,13 @@
 <?php
 namespace Market\Controller;
 
-use Zend\Mvc\Controller\AbstractActionController;
-use Zend\View\Model\ViewModel;
-use Zend\Validator\File;
-use Zend\File\Transfer\Adapter\Http as FileTransfer;
-use Zend\Mail;
-use Zend\Session;
-use Market\Model;
 use Market\Form;
+use Market\Model;
+use Zend\Session;
+use Zend\Validator\File;
+use Zend\View\Model\ViewModel;
+use Zend\Mvc\Controller\AbstractActionController;
+use Zend\File\Transfer\Adapter\Http as FileTransfer;
 
 class DeleteController extends AbstractActionController implements Model\ListingsTableAwareInterface
 {
@@ -67,15 +66,19 @@ class DeleteController extends AbstractActionController implements Model\Listing
         // messages
         if ($deleted) {
             $this->flashMessenger()->addMessage('Item Successfully Deleted');
-            
             /**
              * Task: The deletion of the cache is not part of the core logic. 
              * Move it to a better place on successful deletion.
              */
+            // clear cache
+            $em = $this->getEventManager();
+            $em->trigger($this->getServiceLocator()->get('cache-event-clear'), $this);
+            /*
             if($this->serviceLocator->has('cache')) {
                 $cache = $this->serviceLocator->get('cache');
                 $cache->cleanByTags(array('CAT_' . $item->category));
             }
+            */
         } else {
             $this->flashMessenger()->addMessage('Sorry! Unable to Delete Item.');
         }
