@@ -1,8 +1,8 @@
 <?php
 namespace Application\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
-use Zend\Form\Annotation as ANO;
 
 /**
  * @ORM\Entity("Application\Entity\Event")
@@ -31,12 +31,16 @@ class Event
      * @ORM\Column(type="datetime")
      */
     protected $date;
-
+    
     /**
-     * one event to many registrations
-     * @ORM\OneToMany(targetEntity="Application\Entity\Registration", mappedBy="event")
+     * @ORM\OneToMany(targetEntity="Application\Entity\Registration", mappedBy="eventLink")
      */
-    protected $registration;
+    protected $registrations = array();
+    
+    public function __construct()
+    {
+        $this->registrations = new ArrayCollection();
+    }
     
     /**
 	 * @return the $id
@@ -93,6 +97,23 @@ class Event
 	public function setDate($date) {
 		$this->date = $date;
 	}
+
+	/**
+     * @return the $registrations
+     */
+    public function getRegistrations()
+    {
+        return $this->registrations;
+    }
+
+    /**
+     * @param Application\Entity\Registration $registration
+     */
+    public function setRegistrations($registration)
+    {
+        $this->registrations[] = $registration;
+    }
+
 
     
     

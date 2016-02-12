@@ -9,15 +9,12 @@
 
 namespace Application;
 
+use Zend\Mvc\MvcEvent;
+use Zend\Mvc\ModuleRouteListener;
+use Zend\Filter;
 use Application\Repository\AttendeeRepo;
 use Application\Repository\EventRepo;
 use Application\Repository\RegistrationRepo;
-use Zend\Mvc\ModuleRouteListener;
-use Zend\Mvc\MvcEvent;
-use Doctrine\ORM\Mapping\ClassMetadata;
-use DoctrineModule\Stdlib\Hydrator\DoctrineObject;
-use Zend\Form\Annotation\AnnotationBuilder;
-use Zend\Stdlib\Hydrator\ClassMethods;
 
 class Module
 {
@@ -36,19 +33,19 @@ class Module
 
     public function getAutoloaderConfig()
     {
-        return array(
-            'Zend\Loader\StandardAutoloader' => array(
-                'namespaces' => array(
+        return [
+            'Zend\Loader\StandardAutoloader' => [
+                'namespaces' => [
                     __NAMESPACE__ => __DIR__ . '/src/' . __NAMESPACE__,
-                ),
-            ),
-        );
+                ],
+            ],
+        ];
     }
 
     public function getControllerConfig()
     {
         return array(
-          'initializers' => array(
+          'initializers' => [
               'application-inject-repos' => function ($instance, $cm) {
                   if ($instance instanceof \Application\Controller\RepoAwareInterface) {
                       $sm = $cm->getServiceLocator();
@@ -57,40 +54,24 @@ class Module
                       $instance->setRegistrationRepo($sm->get('application-repo-registration'));
                   }
               }
-          ),
-          'invokables' => array(
-            'Application\Controller\Index' => 'Application\Controller\IndexController',
+          ],
+          'invokables' => [
+            'Application\Controller\Index'  => 'Application\Controller\IndexController',
             'Application\Controller\Signup' => 'Application\Controller\SignupController',
-            'Application\Controller\Admin' => 'Application\Controller\AdminController',
-          ),  
+            'Application\Controller\Admin'  => 'Application\Controller\AdminController',
+          ],  
         );
     }
     // Add this method:
     public function getServiceConfig()
     {
-        return array(
-            'invokables' => array(
-                'application-builder' => 'Zend\Form\Annotation\AnnotationBuilder',
-                'application-registration-entity' => 'Application\Entity\Registration',
-            ),
-            'factories' => array(
-                'application-class-methods-hydrator' => function ($sm) {
-                    $hydrator = new ClassMethods();
-                    // because our class uses property names with '_', by default these are
-                    // converted to camel case.  So if we have a property "last_name",
-                    // the ClassMethods hydrator will assume the setter is setLastName!
-                    // If we remove the "UnderscoreNamingStrategy" we allow the "_" to remain
-                    $hydrator->removeNamingStrategy('UnderscoreNamingStrategy');
-                    //var_dump($hydrator->getNamingStrategy('*')); exit;
-                    return $hydrator;
-                },
-                'application-doctrine-hydrator' => function ($sm) {
-                    return new DoctrineObject($sm->get('doctrine.entitymanager.orm_default'));
-                },
-                'application-repo-attendee'    => function ($sm) {
-                    $em = $sm->get('doctrine.entitymanager.orm_default');
-                    return new AttendeeRepo($em, $em->getClassMetadata('Application\Entity\Attendee'));
-                },
+        return [
+            'invokables' => [
+                'application-entity-event'        => 'Application\Entity\Event',
+                'application-entity-registration' => 'Application\Entity\Registration',
+                'application-entity-attendee'     => 'Application\Entity\Attendee',
+            ],
+            'factories' => [
                 'application-repo-event'       => function ($sm) {
                     $em = $sm->get('doctrine.entitymanager.orm_default');
                     return new EventRepo($em, $em->getClassMetadata('Application\Entity\Event'));
@@ -99,21 +80,18 @@ class Module
                     $em = $sm->get('doctrine.entitymanager.orm_default');
                     return new RegistrationRepo($em, $em->getClassMetadata('Application\Entity\Registration'));
                 },
-                'application-registration-form' => function ($sm) {
-                    // should also implement cache as it takes some
-                    // resources to always build the form this way
-                    $builder = $sm->get('application-builder');
-                    $form = $builder->createForm('Application\Entity\Registration');
-                    $hydrator = $sm->get('application-class-methods-hydrator');
-                    $form->setHydrator($hydrator);
-                    return $form;
+                'application-repo-attendee'    => function ($sm) {
+                    $em = $sm->get('doctrine.entitymanager.orm_default');
+                    return new AttendeeRepo($em, $em->getClassMetadata('Application\Entity\Attendee'));
                 },
-                'application-attendee-form' => function ($sm) {
-                    $builder = $sm->get('application-builder');
-                    return $builder->createForm('Application\Entity\Attendee');
-                }
-            ),
-        );
+                'application-data-filter'   => function ($sm) {
+                    $filter = new Filter\FilterChain();
+                    $filter->attach(new Filter\StringTrim())
+                          ->attach(new Filter\StripTags());
+                    return $filter;
+                },
+            ],
+        ];
     }
 
 

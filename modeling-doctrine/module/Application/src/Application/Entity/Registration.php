@@ -4,17 +4,14 @@ namespace Application\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Application\Entity\Attendee;
-use Zend\Form\Annotation as ANO;
 
 /**
- * @ANO\Name("registration")
  * @ORM\Entity("Application\Entity\Registration")
  * @ORM\Table("registration")
  */
 class Registration
 {
     /**
-     * @ANO\Exclude()
      * @ORM\Column(type="integer", length=11)
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
@@ -22,48 +19,37 @@ class Registration
     protected $id;
     
     /**
-     * @ANO\Type("Zend\Form\Element\Text")
-     * @ANO\Options({"label":"First Name"})
-     * @ANO\Attributes({"class":"input-xlarge","placeholder":"First Name"})
-     * @ANO\Required(TRUE)
-     * @ANO\Filter({"name":"StringTrim"})
-     * @ANO\Validator({"name":"StringLength", "options":{"min":1, "max":255}})
-     * @ANO\Validator({"name":"Alnum", "options":{"AllowWhiteSpace":true}})
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, name="first_name")
      */
-    protected $first_name;
+    protected $firstName;
     
     /**
-     * @ANO\Type("Zend\Form\Element\Text")
-     * @ANO\Options({"label":"Last Name"})
-     * @ANO\Attributes({"class":"input-xlarge","placeholder":"Last Name"})
-     * @ANO\Required(TRUE)
-     * @ANO\Filter({"name":"StringTrim"})
-     * @ANO\Validator({"name":"StringLength", "options":{"min":1, "max":255}})
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, name="last_name")
      */
-    protected $last_name;
+    protected $lastName;
+  
+    /**
+     * @ORM\Column(type="datetime", name="registration_time")
+     */
+    protected $registrationTime;
     
     /**
-     * @ANO\Exclude()
-     * @ORM\Column(type="datetime")
-     */
-    protected $registration_time;
-    
-    /**
-     * one registration to many attendees
-     * @ANO\Exclude()
      * @ORM\OneToMany(targetEntity="Application\Entity\Attendee", indexBy="id", mappedBy="registration")
      */
     protected $attendees = array();
     
+    // can be removed after manually copying data to eventLink
+    // UPDATE registration SET eventLink_id = event_id
     /**
-     * many registrations to one event
-     * @ANO\Exclude()
-     * @ORM\ManyToOne(targetEntity="Application\Entity\Event", inversedBy="registration")
+     * @ORM\Column(type="integer", length=11)
      */
-    protected $event;
+    protected $event_id;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="Application\Entity\Event", inversedBy="registrations")
+     */
+    protected $eventLink;
+    
     public function __construct()
     {
         $this->attendees = new ArrayCollection();
@@ -76,24 +62,24 @@ class Registration
 	}
 
 	/**
-	 * @return the $first_name
+	 * @return the $firstName
 	 */
-	public function getFirst_name() {
-		return $this->first_name;
+	public function getFirstName() {
+		return $this->firstName;
 	}
 
 	/**
-	 * @return the $last_name
+	 * @return the $lastName
 	 */
-	public function getLast_name() {
-		return $this->last_name;
+	public function getLastName() {
+		return $this->lastName;
 	}
 
 	/**
-	 * @return the $registration_time
+	 * @return the $registrationTime
 	 */
-	public function getRegistration_time() {
-		return $this->registration_time;
+	public function getRegistrationTime() {
+		return $this->registrationTime;
 	}
 
 	/**
@@ -104,10 +90,10 @@ class Registration
 	}
 
 	/**
-	 * @return the $event
+	 * @return the $event ID (NOT the entity)
 	 */
 	public function getEvent() {
-		return $this->event;
+		return $this->event_id;
 	}
 
 	/**
@@ -118,27 +104,27 @@ class Registration
 	}
 
 	/**
-	 * @param field_type $first_name
+	 * @param field_type $firstName
 	 */
-	public function setFirst_name($first_name) {
-		$this->first_name = $first_name;
+	public function setFirstName($firstName) {
+		$this->firstName = $firstName;
 	}
 
 	/**
-	 * @param field_type $last_name
+	 * @param field_type $lastName
 	 */
-	public function setLast_name($last_name) {
-		$this->last_name = $last_name;
+	public function setLastName($lastName) {
+		$this->lastName = $lastName;
 	}
 
 	/**
-	 * @param field_type $registration_time
+	 * @param field_type $registrationTime
 	 */
-	public function setRegistration_time($registration_time = NULL) {
-	    if ($registration_time == NULL) {
-	        $registration_time = new \DateTime('now');
+	public function setRegistrationTime($registrationTime = NULL) {
+	    if ($registrationTime == NULL) {
+	        $registrationTime = new \DateTime('now');
 	    }
-		$this->registration_time = $registration_time;
+		$this->registrationTime = $registrationTime;
 	}
 
 	/**
@@ -149,11 +135,28 @@ class Registration
 	}
 
 	/**
-	 * @param field_type $event
+	 * @param int $event 
 	 */
 	public function setEvent($event) {
-		$this->event = $event;
+		$this->event_id = $event;
 	}
+
+	/**
+     * @return the Application\Entity\Event $eventLink
+     */
+    public function getEventLink()
+    {
+        return $this->eventLink;
+    }
+
+    /**
+     * @param Application\Entity\Event $eventLink
+     */
+    public function setEventLink($eventLink)
+    {
+        $this->eventLink = $eventLink;
+    }
+
 
     
         

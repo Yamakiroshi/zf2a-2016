@@ -12,4 +12,9 @@ class EventRepo extends EntityRepository implements ServiceLocatorAwareInterface
     {
         return $this->findOneBy(array('id' => $eventId));
     }
+    public function save($event)
+    {
+        $this->getEntityManager()->persist($event);
+        $this->getEntityManager()->flush();
+    }
 } 
