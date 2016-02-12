@@ -1,0 +1,74 @@
+/**-- Task
+ * Define three table module tables as follows:
+ * -- AttendeeTable
+ * -- EventTable
+ * -- RegistrationTable
+ */
+ 
+ // For all three:
+ /** -- what namespace? */
+/** -- which classes need to be used? */
+/** -- need properties to represent the adapter and tablegateway */
+
+// AttendeeTable
+    /** -- Task
+     * the constructor should do the following:
+     * 1. accept an adapter
+     * 2. store the adapter in the appropriate property
+     * 3. build a TableGateway instance 
+     */
+
+    /** -- Task
+     * Need a method to find all rows for a registration ID
+     * @param int $registrationId
+     * @param bool $withAttendees
+     * @return array database rows based on criteria
+     */
+	
+    /** -- Task
+     * Need method to persist information in database table
+     * @param int $registrationId
+     * @param string $nameOnTicket
+     * 
+     */
+
+// EventTable
+    /** -- the constructor should accept an adapter and assign a TableGateway instance */
+
+    /** -- Task
+     * define a method to find all rows 
+     * @return array
+     */
+
+
+    /** -- Task
+     * define a method to find a row by ID
+     * @param int $id
+     * @return array | FALSE
+     */
+
+// RegistrationTable
+    /** -- Task
+     * Define a method which returns all registrations for an event
+     * If $withAttendees is TRUE: include in the ouput matching entries from the 'attendees' table
+     * @param int $eventId
+     * @param bool $withAttendees
+     * @return boolean|array
+     */
+    
+    /** -- Task
+     * Define a method which returns a row based on id 
+     * @param int $id
+     * @return boolean|array
+     */
+
+	/** -- Task
+	 * Define a function which persists data in the table
+	 * @param int $eventId
+	 * @param string $firstName
+	 * @param string $lastName
+	 * @return int last ID inserted
+	 */
+
+ 
+ 
