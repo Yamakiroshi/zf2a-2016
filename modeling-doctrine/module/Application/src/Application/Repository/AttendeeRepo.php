@@ -6,7 +6,8 @@ use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Application\Entity\Attendee;
 
-class AttendeeRepo extends EntityRepository implements ServiceLocatorAwareInterface
+class AttendeeRepo extends EntityRepository 
+                   implements ServiceLocatorAwareInterface
 {
     use ServiceLocatorAwareTrait;
 
@@ -19,7 +20,7 @@ class AttendeeRepo extends EntityRepository implements ServiceLocatorAwareInterf
     {
         $attendee = new Attendee();
         $attendee->setRegistration($regEntity);
-        $attendee->setName_on_ticket($nameOnTicket);
+        $attendee->setName($nameOnTicket);
         $em = $this->getEntityManager();
         $em->persist($attendee);
         $em->flush();

@@ -5,6 +5,7 @@ use Doctrine\ORM\EntityRepository;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 use Application\Entity\Registration;
+use Application\Entity\Event;
 
 class RegistrationRepo extends EntityRepository implements ServiceLocatorAwareInterface
 {
@@ -12,17 +13,18 @@ class RegistrationRepo extends EntityRepository implements ServiceLocatorAwareIn
     
     /**
      * @param Application\Entity\Event $eventEntity
-     * @param string $firstName
-     * @param string $lastName
+     * @param array $regData
      * @return Application\Entity\Registration $registration
      */
-    public function persist($eventEntity, $firstName, $lastName)
+    public function persist(Event $eventEntity, $regData)
     {
         $registration = new Registration();
-        $registration->setFirst_name($firstName);
-        $registration->setLast_name($lastName);
-        $registration->setEvent($eventEntity);
-        $registration->setRegistration_time(new \DateTime('now'));
+        $registration->setFirstName($regData['firstName']);
+        $registration->setLastName($regData['lastName']);
+        $registration->setEventLink($eventEntity);
+        $registration->setRegistrationTime(new \DateTime('now'));
+        // NOTE: the $event property is actually not needed, but retained for backwards compatibility
+        $registration->setEvent($eventEntity->getId());
         return $this->update($registration);
     }
     public function update($registration)

@@ -1,11 +1,13 @@
-<?php $this->form->prepare(); ?>
+<?php if (isset($this->messages) && $this->messages) : ?>
+<?php echo $this->htmlList($this->messages); ?>
+<?php endif; ?>
 <form class="form-horizontal" action="/signup/<?= $event->getId() ?>" method="POST">
     <fieldset>
 
         <!-- Form Name -->
         <legend>Event Signup</legend>
 
-        Please fill out all items, there is no form validation.
+        Please fill out all items, there is form filtering but no validation.
 
         <div class="control-group">
             <label class="control-label">Event</label>
@@ -17,21 +19,19 @@
 
         <!-- Text input-->
         <div class="control-group">
-            <label class="control-label"><?php echo $this->formLabel($form->get('first_name')); ?></label>
+            <label class="control-label">First Name</label>
             <div class="controls">
-                <!-- <input id="first_name" name="first_name" placeholder="First Name" required="" class="input-xlarge" type="text"> -->
-                <?php echo $this->formText($form->get('first_name')); ?>            
-                <?php echo $this->formElementErrors($form->get('first_name')); ?>
+                <input id="firstName" name="firstName" placeholder="First Name" required="" class="input-xlarge" type="text">
+
             </div>
         </div>
 
         <!-- Text input-->
         <div class="control-group">
-            <label class="control-label"><?php echo $this->formLabel($form->get('last_name')); ?></label>
+            <label class="control-label">Last Name</label>
             <div class="controls">
-                <!-- <input id="last_name" name="last_name" placeholder="Last Name" required="" class="input-xlarge" type="text"> -->
-                <?php echo $this->formText($form->get('last_name')); ?>            
-                <?php echo $this->formElementErrors($form->get('last_name')); ?>
+                <input id="lastName" name="lastName" placeholder="Last Name" required="" class="input-xlarge" type="text">
+
             </div>
         </div>
 

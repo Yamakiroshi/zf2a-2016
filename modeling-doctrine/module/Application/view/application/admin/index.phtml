@@ -1,3 +1,1 @@
-<?php foreach ($events as $event): ?>
-    <a href="/admin/<?php echo $event->getId() ?>"><?php echo $event->getName() ?></a><br />
-<?php endforeach; ?>
+<?= $this->partial('application/partials/list_events', ['events' => $events, 'route' => 'admin']); ?>

@@ -23,20 +23,16 @@ class AdminController extends AbstractActionController implements RepoAwareInter
 
     protected function listEvents()
     {
-        $viewModel = new ViewModel(array('events' => $this->eventRepo->findAll()));
+        $viewModel = new ViewModel(
+            ['events' => $this->eventRepo->findAll()]);
         $viewModel->setTemplate('application/admin/index');
         return $viewModel;
     }
     
     protected function listRegistrations($eventId)
-    {
-        
+    {        
         $eventEntity = $this->eventRepo->findById($eventId);
-        // rewrite to create link between event and registration
-        // then do an $event->getRegistration()
-        $registrations = $this->registrationRepo->findBy(array('event' => $eventId));
-
-        $vm = new ViewModel(array('event' => $eventEntity, 'registrations' => $registrations));
+        $vm = new ViewModel(array('event' => $eventEntity));
         $vm->setTemplate('application/admin/list.phtml');
         return $vm;
     }

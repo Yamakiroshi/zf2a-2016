@@ -7,9 +7,6 @@ use Zend\Mvc\Controller\Plugin\PostRedirectGet;
 use Zend\Mvc\Controller\Plugin\Redirect;
 use Zend\Mvc\InjectApplicationEventInterface;
 use Zend\View\Model\ViewModel;
-use Application\Entity\Registration;
-use Zend\Stdlib\Hydrator\ClassMethods;
-use Zend\Form\FormInterface;
 
 class SignupController extends AbstractActionController 
                        implements InjectApplicationEventInterface, RepoAwareInterface
@@ -36,60 +33,86 @@ class SignupController extends AbstractActionController
 
     protected function eventSignup($eventId)
     {
-        $form = $this->getServiceLocator()->get('application-registration-form');
-        $form->bind($this->getServiceLocator()->get('application-registration-entity'));
         $event = $this->eventRepo->findById($eventId);
 
         if (!$event) {
-            // better 404 experience?
-            return $this->notFoundAction();
+            return $this->indexAction();
         }
 
+        $messages = array();
         if ($this->request->isPost()) {
-            if ($this->processForm($event, $form)) {
+            $regData = ['firstName' => $this->params()->fromPost('firstName'),
+                        'lastName' => $this->params()->fromPost('lastName'),
+            ];
+            $ticketData = $this->params()->fromPost('ticket');
+            $this->filterData($messages, $regData, $ticketData);
+            if ($this->processForm($ticketData, $event, $regData))
                 return $this->redirect()->toUrl('/thank-you');
-            }
         }
 
-        $vm = new ViewModel(array('event' => $event, 'form' => $form));
+        $vm = new ViewModel(['event' => $event,
+                             'messages' => $messages,
+        ]);
         $vm->setTemplate('application/signup/form.phtml');
         return $vm;
     }
 
-    protected function processForm($event, $form)
+    protected function filterData(&$messages, $regData, $ticketData)
     {
-        $formData = $this->params()->fromPost();
-        $form->setData($formData);
-        if (!$form->isValid()) {
-            return FALSE;
+        $filter = $this->getServiceLocator()->get('application-data-filter');
+        foreach ($regData as $key => $value) {
+            $regData[$key] = $filter->filter($value);
         }
-        // validate ticket data
-        $goodTicket = array();
-        $ticketForm = $this->getServiceLocator()->get('application-attendee-form');
-        $nameValidator = $ticketForm->getInputFilter()->get('name_on_ticket');
-        $ticketData = $formData['ticket'];
+        foreach ($ticketData as $key => $value) {
+            $ticketData[$key] = $filter->filter($value);
+        }
+    }
+    
+    protected function processForm(array $ticketData, $event, $regData)
+    {
+        $reg = $this->registrationRepo->persist($event, $regData);
+        $event->setRegistrations($reg);
+        $this->eventRepo->save($event);
         foreach ($ticketData as $nameOnTicket) {
-            $nameValidator->setValue($nameOnTicket);
-            if (!$nameValidator->isValid()) {
-                return FALSE;
-            }   
-            $goodTicket[] = $nameValidator->getValue();
-        }
-        // TODO: find out why hydrator is not returning an object
-        //$data = $form->getData(FormInterface::VALUES_AS_ARRAY);
-        $reg = $form->getData();
-        // TODO: rewrite this persist now that we have the object
-        $reg = $this->registrationRepo->persist($event, 
-                                                $data['first_name'], 
-                                                $data['last_name']);
-        foreach ($goodTicket as $nameOnTicket) {
-            
             $attendee = $this->attendeeRepo->persist($reg, $nameOnTicket);
             $reg->setAttendees($attendee);
             $this->registrationRepo->update($reg);
         }
         
         return true;
+    }
+
+    /**
+     * @return the $regForm
+     */
+    public function getRegForm()
+    {
+        if (!$this->regForm) {
+            $this->regForm = $this->getServiceLocator()->get('application-form-registration');
+        }
+        return $this->regForm;
+    }
+
+    /**
+     * @return the $baseForm
+     */
+    public function getBaseForm()
+    {
+        if (!$this->baseForm) {
+            $this->baseForm = $this->getServiceLocator()->get('application-form-base');
+        }
+        return $this->baseForm;
+    }
+
+    /**
+     * @return the $attendeeForm
+     */
+    public function getAttendeeForm()
+    {
+        if (!$this->attendeeForm) {
+            $this->attendeeForm = $this->getServiceLocator()->get('application-form-attendee');
+        }
+        return $this->attendeeForm;
     }
 
 }
